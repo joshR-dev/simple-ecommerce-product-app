@@ -1,8 +1,17 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen, act } from "@testing-library/react";
 import { ProductDetail } from "./index";
 import { CartProvider } from "~/context/cart-context";
 import type { Product } from "~/types/product";
+
+function mockFetch() {
+  vi.spyOn(globalThis, "fetch").mockImplementation(async () =>
+    new Response(JSON.stringify({ items: [] }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    }),
+  );
+}
 
 const mockProduct: Product = {
   id: 1,
@@ -26,6 +35,11 @@ function renderProductDetail() {
 }
 
 describe("ProductDetail", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    mockFetch();
+  });
+
   it("renders product title, price, description, and image", () => {
     renderProductDetail();
     expect(screen.getByText("Classic Tee")).toBeInTheDocument();

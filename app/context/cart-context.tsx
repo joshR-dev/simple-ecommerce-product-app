@@ -8,7 +8,26 @@ import {
 } from "react";
 import type { CartItem } from "~/types/product";
 
-const CART_STORAGE_KEY = "cart";
+interface ApiCartItem {
+  id: number;
+  product_id: number;
+  product_title: string;
+  size_label: string;
+  price: number;
+  image_url: string;
+  quantity: number;
+}
+
+function toCartItem(row: ApiCartItem): CartItem {
+  return {
+    productId: row.product_id,
+    productTitle: row.product_title,
+    sizeLabel: row.size_label,
+    price: row.price,
+    imageURL: row.image_url,
+    quantity: row.quantity,
+  };
+}
 
 interface CartContextValue {
   items: CartItem[];
@@ -25,54 +44,47 @@ const CartContext = createContext<CartContextValue | null>(null);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(CART_STORAGE_KEY);
-      if (stored) {
-        setItems(JSON.parse(stored));
-      }
-    } catch (e) {
-      console.warn("Failed to parse cart data", e);
-    }
-    setHydrated(true);
+    fetch("/api/cart")
+      .then((res) => res.json())
+      .then((data) => setItems(data.items.map(toCartItem)))
+      .catch((e) => console.warn("Failed to fetch cart", e));
   }, []);
-
-  useEffect(() => {
-    if (hydrated) {
-      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
-    }
-  }, [items, hydrated]);
-
 
   const openCart = useCallback(() => setIsCartOpen(true), []);
   const closeCart = useCallback(() => setIsCartOpen(false), []);
   const toggleCart = useCallback(() => setIsCartOpen((prev) => !prev), []);
 
-  const addToCart = useCallback((newItem: Omit<CartItem, "quantity">) => {
-    setItems((prev) => {
-      const existingIndex = prev.findIndex(
-        (item) =>
-          item.productId === newItem.productId &&
-          item.sizeLabel === newItem.sizeLabel
-      );
-      if (existingIndex >= 0) {
-        return prev.map((item, i) =>
-          i === existingIndex
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-      return [...prev, { ...newItem, quantity: 1 }];
-    });
-    openCart();
-  }, [openCart]);
+  const addToCart = useCallback(
+    (newItem: Omit<CartItem, "quantity">) => {
+      fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newItem),
+      })
+        .then((res) => res.json())
+        .then((data) => setItems(data.items.map(toCartItem)))
+        .catch((e) => console.warn("Failed to add to cart", e));
+      openCart();
+    },
+    [openCart],
+  );
 
   const totalItemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <CartContext.Provider value={{ items, addToCart, totalItemCount, isCartOpen, openCart, closeCart, toggleCart }}>
+    <CartContext.Provider
+      value={{
+        items,
+        addToCart,
+        totalItemCount,
+        isCartOpen,
+        openCart,
+        closeCart,
+        toggleCart,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
