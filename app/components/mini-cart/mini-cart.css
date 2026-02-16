@@ -64,3 +64,47 @@
   font-size: 13px;
   color: var(--color-text-secondary);
 }
+
+.mini-cart-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.mini-cart-qty-btn {
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--color-border);
+  background: var(--color-white);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mini-cart-qty-btn:hover {
+  border-color: var(--color-border-hover);
+}
+
+.mini-cart-qty-value {
+  font-size: 14px;
+  min-width: 16px;
+  text-align: center;
+}
+
+.mini-cart-remove-btn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--color-error);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.mini-cart-remove-btn:hover {
+  text-decoration: underline;
+}

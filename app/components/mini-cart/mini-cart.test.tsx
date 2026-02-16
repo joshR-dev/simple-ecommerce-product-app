@@ -107,4 +107,61 @@ describe("MiniCart", () => {
     });
     expect(screen.getByText("$75.00")).toBeInTheDocument();
   });
+
+  it("calls updateQuantity when +/- buttons are clicked", async () => {
+    const fetchSpy = mockFetch({
+      "GET /api/cart": { items: [{ ...mockApiItem, quantity: 2 }] },
+      "PUT /api/cart": { items: [{ ...mockApiItem, quantity: 3 }] },
+    });
+    render(
+      <CartProvider>
+        <MiniCart />
+      </CartProvider>,
+    );
+    await waitFor(() => {
+      expect(screen.getByText(/2x/)).toBeInTheDocument();
+    });
+    act(() =>
+      screen
+        .getByLabelText("Increase quantity of Classic Tee size S")
+        .click(),
+    );
+    await waitFor(() => {
+      expect(fetchSpy).toHaveBeenCalledWith("/api/cart", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: 1, quantity: 3 }),
+      });
+    });
+  });
+
+  it("calls removeItem when Remove button is clicked", async () => {
+    const fetchSpy = mockFetch({
+      "GET /api/cart": { items: [mockApiItem] },
+      "DELETE /api/cart": { items: [] },
+    });
+    render(
+      <CartProvider>
+        <MiniCart />
+      </CartProvider>,
+    );
+    await waitFor(() => {
+      expect(screen.getByText("Classic Tee")).toBeInTheDocument();
+    });
+    act(() =>
+      screen
+        .getByLabelText("Remove Classic Tee size S from cart")
+        .click(),
+    );
+    await waitFor(() => {
+      expect(fetchSpy).toHaveBeenCalledWith("/api/cart", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: 1 }),
+      });
+    });
+    await waitFor(() => {
+      expect(screen.getByText("Your cart is empty.")).toBeInTheDocument();
+    });
+  });
 });

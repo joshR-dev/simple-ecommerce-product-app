@@ -20,6 +20,7 @@ interface ApiCartItem {
 
 function toCartItem(row: ApiCartItem): CartItem {
   return {
+    id: row.id,
     productId: row.product_id,
     productTitle: row.product_title,
     sizeLabel: row.size_label,
@@ -31,7 +32,9 @@ function toCartItem(row: ApiCartItem): CartItem {
 
 interface CartContextValue {
   items: CartItem[];
-  addToCart: (item: Omit<CartItem, "quantity">) => void;
+  addToCart: (item: Omit<CartItem, "quantity" | "id">) => void;
+  updateQuantity: (id: number, quantity: number) => void;
+  removeItem: (id: number) => void;
   totalItemCount: number;
   isCartOpen: boolean;
   openCart: () => void;
@@ -57,7 +60,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const toggleCart = useCallback(() => setIsCartOpen((prev) => !prev), []);
 
   const addToCart = useCallback(
-    (newItem: Omit<CartItem, "quantity">) => {
+    (newItem: Omit<CartItem, "quantity" | "id">) => {
       fetch("/api/cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -71,6 +74,28 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [openCart],
   );
 
+  const updateQuantity = useCallback((id: number, quantity: number) => {
+    fetch("/api/cart", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, quantity }),
+    })
+      .then((res) => res.json())
+      .then((data) => setItems(data.items.map(toCartItem)))
+      .catch((e) => console.warn("Failed to update cart item", e));
+  }, []);
+
+  const removeItem = useCallback((id: number) => {
+    fetch("/api/cart", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    })
+      .then((res) => res.json())
+      .then((data) => setItems(data.items.map(toCartItem)))
+      .catch((e) => console.warn("Failed to remove cart item", e));
+  }, []);
+
   const totalItemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
@@ -78,6 +103,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       value={{
         items,
         addToCart,
+        updateQuantity,
+        removeItem,
         totalItemCount,
         isCartOpen,
         openCart,

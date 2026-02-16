@@ -37,8 +37,15 @@ function mockFetch(responses: Record<string, unknown>) {
 }
 
 function TestConsumer() {
-  const { items, totalItemCount, isCartOpen, addToCart, toggleCart } =
-    useCart();
+  const {
+    items,
+    totalItemCount,
+    isCartOpen,
+    addToCart,
+    updateQuantity,
+    removeItem,
+    toggleCart,
+  } = useCart();
   return (
     <div>
       <span data-testid="count">{totalItemCount}</span>
@@ -49,6 +56,8 @@ function TestConsumer() {
         Add L
       </button>
       <button onClick={toggleCart}>Toggle</button>
+      <button onClick={() => updateQuantity(1, 5)}>Update Qty</button>
+      <button onClick={() => removeItem(1)}>Remove</button>
     </div>
   );
 }
@@ -238,6 +247,58 @@ describe("CartProvider", () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(mockItem),
       });
+    });
+  });
+
+  it("sends PUT to API when updating quantity", async () => {
+    const fetchSpy = mockFetch({
+      "GET /api/cart": { items: [mockApiItem] },
+      "PUT /api/cart": { items: [{ ...mockApiItem, quantity: 5 }] },
+    });
+    render(
+      <CartProvider>
+        <TestConsumer />
+      </CartProvider>,
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId("count")).toHaveTextContent("1");
+    });
+    act(() => screen.getByText("Update Qty").click());
+    await waitFor(() => {
+      expect(fetchSpy).toHaveBeenCalledWith("/api/cart", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: 1, quantity: 5 }),
+      });
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId("count")).toHaveTextContent("5");
+    });
+  });
+
+  it("sends DELETE to API when removing item", async () => {
+    const fetchSpy = mockFetch({
+      "GET /api/cart": { items: [mockApiItem] },
+      "DELETE /api/cart": { items: [] },
+    });
+    render(
+      <CartProvider>
+        <TestConsumer />
+      </CartProvider>,
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId("count")).toHaveTextContent("1");
+    });
+    act(() => screen.getByText("Remove").click());
+    await waitFor(() => {
+      expect(fetchSpy).toHaveBeenCalledWith("/api/cart", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: 1 }),
+      });
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId("count")).toHaveTextContent("0");
     });
   });
 });
