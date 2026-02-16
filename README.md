@@ -8,17 +8,20 @@ A product details page with shopping cart functionality built with React Router 
 - Size selection with validation (required before adding to cart)
 - Mini-cart dropdown with item quantities
 - Duplicate product-size combinations consolidated into single rows
-- Cart persistence via localStorage
+- Cart persistence via SQLite database (REST API)
 - Plain CSS with CSS custom properties (variables)
-- Docker support for containerized deployment
+- Automated tests with Vitest and Testing Library
+- Docker Compose for local deployment
 
 ## Tech Stack
 
-- **React Router v7** - Routing, SSR, data loading (loaders)
+- **React Router v7** - Routing, SSR, data loading (loaders/actions)
 - **React 19** - UI components
 - **TypeScript** - Type safety
 - **Vite** - Build tool and dev server
+- **SQLite** - Cart persistence via better-sqlite3
 - **CSS** - Plain CSS with custom properties
+- **Vitest** - Unit and integration testing
 
 ## Getting Started
 
@@ -39,6 +42,12 @@ npm run dev
 The application will be available at `http://localhost:5173`.
 
 Navigate to `/product` to view the product details page.
+
+### Testing
+
+```bash
+npm run test
+```
 
 ### Type Checking
 
@@ -63,20 +72,33 @@ app/
   routes/
     home.tsx                 # Home page
     product.tsx              # Product page with server-side loader
+    api.cart.ts              # Cart REST API (GET/POST/PUT/DELETE)
   components/
     navbar/                  # Top navigation bar with cart button
     mini-cart/               # Cart dropdown with item list
     product-detail/          # Product display with size selection
     size-selector/           # Size option buttons
   context/
-    cart-context.tsx          # Cart state management with localStorage
+    cart-context.tsx          # Cart state management (fetches from API)
+  db/
+    cart.server.ts            # SQLite database layer
   types/
     product.ts               # Shared TypeScript interfaces
 ```
 
-## Docker Deployment
+## Cart API
+
+| Method | Endpoint | Description |
+| ------ | -------- | ----------- |
+| GET | `/api/cart` | Retrieve all cart items |
+| POST | `/api/cart` | Add item (deduplicates) |
+| PUT | `/api/cart` | Update item quantity |
+| DELETE | `/api/cart` | Remove item |
+
+## Docker Compose
 
 ```bash
-docker build -t my-app .
-docker run -p 3000:3000 my-app
+docker compose up --build
 ```
+
+The app will be available at `http://localhost:3000`. Cart data persists across container restarts via a Docker volume.
