@@ -1,0 +1,25 @@
+.size-selector {
+  display: flex;
+  gap: 8px;
+}
+
+.size-option {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-border);
+  background: var(--color-white);
+  font-size: 13px;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.size-option:hover {
+  border-color: var(--color-text-muted);
+}
+
+.size-option-selected {
+  border-color: var(--color-text-primary);
+  background-color: var(--color-text-primary);
+  color: var(--color-white);
+}

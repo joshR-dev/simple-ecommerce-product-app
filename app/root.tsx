@@ -41,8 +41,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+import { CartProvider } from "~/context/cart-context";
+import { Navbar } from "~/components/navbar";
+
 export default function App() {
-  return <Outlet />;
+  return (
+    <CartProvider>
+      <Navbar />
+      <Outlet />
+    </CartProvider>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
@@ -62,11 +70,11 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main className="pt-16 p-4 container mx-auto">
+    <main style={{ padding: "64px 16px", maxWidth: "960px", margin: "0 auto" }}>
       <h1>{message}</h1>
       <p>{details}</p>
       {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
+        <pre style={{ width: "100%", padding: "16px", overflowX: "auto" }}>
           <code>{stack}</code>
         </pre>
       )}

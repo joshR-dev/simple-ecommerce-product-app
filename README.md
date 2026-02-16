@@ -1,24 +1,28 @@
-# Welcome to React Router!
+# Product Details Page with Cart
 
-A modern, production-ready template for building full-stack React applications using React Router.
-
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+A product details page with shopping cart functionality built with React Router v7, TypeScript, and plain CSS.
 
 ## Features
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+- Server-side rendered product page fetched from an external API
+- Size selection with validation (required before adding to cart)
+- Mini-cart dropdown with item quantities
+- Duplicate product-size combinations consolidated into single rows
+- Cart persistence via localStorage
+- Plain CSS with CSS custom properties (variables)
+- Docker support for containerized deployment
+
+## Tech Stack
+
+- **React Router v7** - Routing, SSR, data loading (loaders)
+- **React 19** - UI components
+- **TypeScript** - Type safety
+- **Vite** - Build tool and dev server
+- **CSS** - Plain CSS with custom properties
 
 ## Getting Started
 
 ### Installation
-
-Install the dependencies:
 
 ```bash
 npm install
@@ -32,56 +36,47 @@ Start the development server with HMR:
 npm run dev
 ```
 
-Your application will be available at `http://localhost:5173`.
+The application will be available at `http://localhost:5173`.
 
-## Building for Production
+Navigate to `/product` to view the product details page.
 
-Create a production build:
+### Type Checking
+
+```bash
+npm run typecheck
+```
+
+### Production Build
 
 ```bash
 npm run build
+npm run start
 ```
 
-## Deployment
+## Project Structure
 
-### Docker Deployment
+```text
+app/
+  app.css                    # Global styles and CSS variables
+  root.tsx                   # Root layout with CartProvider and Navbar
+  routes.ts                  # Route configuration
+  routes/
+    home.tsx                 # Home page
+    product.tsx              # Product page with server-side loader
+  components/
+    navbar/                  # Top navigation bar with cart button
+    mini-cart/               # Cart dropdown with item list
+    product-detail/          # Product display with size selection
+    size-selector/           # Size option buttons
+  context/
+    cart-context.tsx          # Cart state management with localStorage
+  types/
+    product.ts               # Shared TypeScript interfaces
+```
 
-To build and run using Docker:
+## Docker Deployment
 
 ```bash
 docker build -t my-app .
-
-# Run the container
 docker run -p 3000:3000 my-app
 ```
-
-The containerized application can be deployed to any platform that supports Docker, including:
-
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.
